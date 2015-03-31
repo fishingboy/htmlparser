@@ -12,8 +12,11 @@ $html = <<<HTML
 HTML;
 
 // $html = "<div>Hello World!</div>";
-echo "html={$html}";
+// echo "html={$html}";
 $parser = new Htmlparser($html);
+
+
+// echo "tag = " . Htmlparser::get_tag_name("<div>");
 
 
 /**
@@ -78,13 +81,21 @@ class Htmlparser
             if ($this->_is_end_tag($tag))
             {
                 $curr_level--;
+                $curr_dom = & $curr_dom['parent'];
                 echo "end tag = " . htmlspecialchars($tag, ENT_QUOTES) . "<br>";
             }
             else
             {
                 $curr_level++;
-                // $curr_dom = & $curr_dom['childs'][] = array();
-                // array_push($curr_dom, $tag);
+                $curr_dom['parent'] = & $curr_dom;
+                $curr_dom = & $curr_dom['childs'];
+                if ( ! is_array($curr_dom))
+                {
+                    $curr_dom = array();
+                }
+                // $curr_dom = array('node' => $tag);
+                // echo "<pre>LOL = " . print_r($this->get_tag_name($tag), TRUE). "</pre>";
+                array_push($curr_dom, array('node' => $this->get_tag_name($tag)));
             }
             $content = substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos-1);
             echo "content = " . htmlspecialchars($content, ENT_QUOTES) . "<br>";
@@ -97,6 +108,11 @@ class Htmlparser
     public function get_dom()
     {
         return $this->_dom;
+    }
+
+    public function get_tag_name($tag='')
+    {
+        return substr($tag, 1, strlen($tag)-2);
     }
 
     private function _is_end_tag($tag)
