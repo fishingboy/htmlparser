@@ -35,6 +35,13 @@ class tree
     private $_parent_stack = array();
 
     /**
+     * 節點數量
+     *
+     * @var integer
+     */
+    private $_node_count = 0;
+
+    /**
      * 建構子
      *
      * @param mixed $value 根節點資料
@@ -58,6 +65,7 @@ class tree
         $this->_curr = & $this->_tree;
         $this->_curr_level = 0;
         $this->_parent_stack = array();
+        $this->_node_count = 1;
     }
 
     /**
@@ -68,6 +76,7 @@ class tree
     public function add_child($value)
     {
         $this->_curr['childs'][] = $this->get_node_format($value);
+        $this->_node_count++;
     }
 
     /**
@@ -86,9 +95,20 @@ class tree
      */
     public function seek_child($index=0)
     {
-        $this->_parent_stack[] = & $this->_curr;
+        $this->_parent_stack[$this->_curr_level] = & $this->_curr;
         $this->_curr = & $this->_curr['childs'][$index];
         $this->_curr_level++;
+    }
+
+    /**
+     * 走訪子節點
+     *
+     * @param  integer $index 要走到第幾個子節點(從 0 開始)
+     */
+    public function seek_last_child()
+    {
+        $last_index = count($this->_curr['childs']);
+        $this->seek_child($last_index - 1);
     }
 
     /**
@@ -102,6 +122,16 @@ class tree
     }
 
     /**
+     * 取得節點數量
+     *
+     * @return integer 節點數量
+     */
+    public function get_count()
+    {
+        return $this->_node_count;
+    }
+
+    /**
      * 取得節點的資料格式
      * @param  mixed $value 節點資料
      * @return array        節點資料格式
@@ -112,28 +142,3 @@ class tree
     }
 
 }
-
-$tree = new tree(1);
-// $tree->set_root(1);
-$tree->add_child(2);
-$tree->add_child(3);
-
-$tree->seek_child(1);
-$tree->add_child(4);
-$tree->add_child(5);
-
-$tree->seek_child(1);
-$tree->add_child(6);
-$tree->add_child(7);
-
-$tree->seek_parent();
-$tree->add_child(8);
-$tree->add_child(9);
-
-
-$result = $tree->get_tree();
-
-echo "<pre>result = " . print_r($result, TRUE). "</pre>";
-
-echo "<pre>tree = " . print_r($tree, TRUE). "</pre>";
-?>
