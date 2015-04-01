@@ -1,12 +1,25 @@
 <?php
+include_once('tree.php');
+
+// $html = <<<HTML
+// <html>
+//     <haed>
+//         <title>Hello Title</title>
+//     </head>
+//     <body>
+//         abc
+//         <div style="color:red">Hello World!</div>
+//     </body>
+// </html>
+// HTML;
 $html = <<<HTML
 <html>
     <haed>
-    <title>Hello Title</title>
+        <title>Hello Title</title>
     </head>
     <body>
-    abc
-    <div style="color:red">Hello World!</div><br />
+        <div>1</div>
+        <div>2</div>
     </body>
 </html>
 HTML;
@@ -58,12 +71,9 @@ class Htmlparser
     {
         $curr_pos = -1;
         $html_length = strlen($this->_html);
-        $curr_tag = "";
-        $curr_dom = & $this->_dom;
-        $curr_level = 0;
-        $curr_count = array();
-        $prev_tag = "";
-        $tag_stack = array();
+        $stack = array();
+
+        $tree = new tree();
 
         while ($curr_pos < $html_length)
         {
@@ -80,28 +90,27 @@ class Htmlparser
             // echo "text=" . htmlspecialchars($text, ENT_QUOTES);
             if ($this->_is_end_tag($tag))
             {
-                $curr_level--;
-                $curr_dom = & $curr_dom['parent'];
-                echo "end tag = " . htmlspecialchars($tag, ENT_QUOTES) . "<br>";
+                $tree->seek_parent();
             }
             else
             {
-                $curr_level++;
-                $curr_dom['parent'] = & $curr_dom;
-                $curr_dom = & $curr_dom['childs'];
-                if ( ! is_array($curr_dom))
+                if ($tree->get_count() == 0)
                 {
-                    $curr_dom = array();
+                    $tree->set_root($this->get_tag_name($tag));
                 }
-                // $curr_dom = array('node' => $tag);
-                // echo "<pre>LOL = " . print_r($this->get_tag_name($tag), TRUE). "</pre>";
-                array_push($curr_dom, array('node' => $this->get_tag_name($tag)));
+                else
+                {
+                    $tree->add_child($this->get_tag_name($tag));
+                    $tree->seek_last_child();
+                }
+                // array_push($curr_dom, array('node' => $this->get_tag_name($tag)));
             }
             $content = substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos-1);
             echo "content = " . htmlspecialchars($content, ENT_QUOTES) . "<br>";
             $curr_pos = $gt_pos;
         }
 
+        $this->_dom = $tree->get_tree();
         echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
     }
 
