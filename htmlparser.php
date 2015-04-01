@@ -74,7 +74,7 @@ class Htmlparser
         $stack = array();
 
         $tree = new tree();
-
+        $tag_stack = array();
         while ($curr_pos < $html_length)
         {
             $lt_pos = strpos($this->_html, '<', $curr_pos+1);
@@ -90,20 +90,26 @@ class Htmlparser
             // echo "text=" . htmlspecialchars($text, ENT_QUOTES);
             if ($this->_is_end_tag($tag))
             {
+                $tag_head = array_pop($tag_stack);
+                // if ($tag_head)
+                // {
+                // }
                 $tree->seek_parent();
             }
             else
             {
+                $tag_name = $this->get_tag_name($tag);
                 if ($tree->get_count() == 0)
                 {
-                    $tree->set_root($this->get_tag_name($tag));
+                    $tree->set_root($tag_name);
                 }
                 else
                 {
-                    $tree->add_child($this->get_tag_name($tag));
+                    $tree->add_child($tag_name);
                     $tree->seek_last_child();
                 }
-                // array_push($curr_dom, array('node' => $this->get_tag_name($tag)));
+
+                $tag_stack[] = $tag_name;
             }
             $content = substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos-1);
             echo "content = " . htmlspecialchars($content, ENT_QUOTES) . "<br>";
@@ -121,7 +127,7 @@ class Htmlparser
 
     public function get_tag_name($tag='')
     {
-        return substr($tag, 1, strlen($tag)-2);
+        return strtoupper(substr($tag, 1, strlen($tag)-2));
     }
 
     private function _is_end_tag($tag)
