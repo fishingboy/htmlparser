@@ -1,17 +1,32 @@
 <?php
+include_once('tree.php');
+
+// $html = <<<HTML
+// <html>
+//     <haed>
+//         <title>Hello Title</title>
+//     </head>
+//     <body>
+//         abc
+//         <div style="color:red">Hello World!</div>
+//     </body>
+// </html>
+// HTML;
+
+
 $html = <<<HTML
 <html>
     <haed>
-    <title>Hello Title</title>
+        <title>Hello Title</title>
     </head>
     <body>
-    abc
-    <div style="color:red">Hello World!</div><br />
+        <div>1</div>
+        <div>2</div>
     </body>
 </html>
 HTML;
 
-// $html = "<div>Hello World!</div>";
+$html = "<div>Hello <span>World!</span> !!!!</div>";
 // echo "html={$html}";
 $parser = new Htmlparser($html);
 
@@ -58,13 +73,10 @@ class Htmlparser
     {
         $curr_pos = -1;
         $html_length = strlen($this->_html);
-        $curr_tag = "";
-        $curr_dom = & $this->_dom;
-        $curr_level = 0;
-        $curr_count = array();
-        $prev_tag = "";
-        $tag_stack = array();
+        $stack = array();
 
+        $tree = new tree();
+        $tag_stack = array();
         while ($curr_pos < $html_length)
         {
             $lt_pos = strpos($this->_html, '<', $curr_pos+1);
@@ -78,30 +90,40 @@ class Htmlparser
             $tag = substr($this->_html, $lt_pos, $gt_pos-$lt_pos+1);
             echo "tag=" . htmlspecialchars($tag, ENT_QUOTES);
             // echo "text=" . htmlspecialchars($text, ENT_QUOTES);
+            $content = trim(substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos-1));
+            if ($content)
+            {
+                echo "<pre>content = " . print_r($content, TRUE). "</pre>";
+                $tree->add_child(array('content' => $content));
+            }
+
             if ($this->_is_end_tag($tag))
             {
-                $curr_level--;
-                $curr_dom = & $curr_dom['parent'];
-                echo "end tag = " . htmlspecialchars($tag, ENT_QUOTES) . "<br>";
+                $tag_head = array_pop($tag_stack);
+                // if ($tag_head)
+                // {
+                // }
+                $tree->seek_parent();
             }
             else
             {
-                $curr_level++;
-                $curr_dom['parent'] = & $curr_dom;
-                $curr_dom = & $curr_dom['childs'];
-                if ( ! is_array($curr_dom))
+                $tag_name = $this->get_tag_name($tag);
+                if ($tree->get_count() == 0)
                 {
-                    $curr_dom = array();
+                    $tree->set_root(array('tag' => $this->get_tag_name($tag)));
                 }
-                // $curr_dom = array('node' => $tag);
-                // echo "<pre>LOL = " . print_r($this->get_tag_name($tag), TRUE). "</pre>";
-                array_push($curr_dom, array('node' => $this->get_tag_name($tag)));
+                else
+                {
+                    $tree->add_child(array('tag' => $this->get_tag_name($tag)));
+                    $tree->seek_last_child();
+                }
+
+                $tag_stack[] = $tag_name;
             }
-            $content = substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos-1);
-            echo "content = " . htmlspecialchars($content, ENT_QUOTES) . "<br>";
             $curr_pos = $gt_pos;
         }
 
+        $this->_dom = $tree->get_tree();
         echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
     }
 
@@ -112,7 +134,7 @@ class Htmlparser
 
     public function get_tag_name($tag='')
     {
-        return substr($tag, 1, strlen($tag)-2);
+        return strtoupper(substr($tag, 1, strlen($tag)-2));
     }
 
     private function _is_end_tag($tag)
