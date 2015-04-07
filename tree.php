@@ -4,7 +4,7 @@
  *
  * @author Leo Kuo <et282523@hotmail.com>
  */
-class tree
+class Tree
 {
     /**
      * 樹 - 資料

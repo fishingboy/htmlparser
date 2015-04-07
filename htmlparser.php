@@ -75,7 +75,7 @@ class Htmlparser
         $html_length = strlen($this->_html);
         $stack = array();
 
-        $tree = new tree();
+        $tree = new Tree();
         $tag_stack = array();
         while ($curr_pos < $html_length)
         {
