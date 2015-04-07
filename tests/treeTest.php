@@ -4,6 +4,9 @@ require_once __DIR__ . '/../tree.php';
 
 class treeTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * 基本的測試
+     */
     public function test_get_tree()
     {
         $tree = new Tree();
