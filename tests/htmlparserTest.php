@@ -21,4 +21,24 @@ class htmlparserTest extends PHPUnit_Framework_TestCase
         ];
         $this->assertEquals($success_result, $dom);
     }
+
+    /**
+     * get_tag 測試
+     */
+    public function test_get_tag()
+    {
+        $this->assertEquals("DIV", Htmlparser::get_tag_name("<div>"));
+        $this->assertEquals("SPAN", Htmlparser::get_tag_name("<SpAn style='color:red'>"));
+    }
+
+    /**
+     * is_end_tag 測試
+     */
+    public function test_is_end_tag()
+    {
+        $this->assertEquals(FALSE, Htmlparser::is_end_tag("<div>"));
+        $this->assertEquals(TRUE, Htmlparser::is_end_tag("</div>"));
+        $this->assertEquals(TRUE, Htmlparser::is_end_tag("<br />"));
+        $this->assertEquals(FALSE, Htmlparser::is_end_tag("<br>"));
+    }
 }
