@@ -127,6 +127,11 @@ class Htmlparser
         echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
     }
 
+    /**
+     * 取得整個 dom 的結構
+     *
+     * @return mixed dom 的結構
+     */
     public function get_dom()
     {
         return $this->_dom;
