@@ -75,7 +75,7 @@ class Htmlparser
         $html_length = strlen($this->_html);
         $stack = array();
 
-        $tree = new tree();
+        $tree = new Tree();
         $tag_stack = array();
         while ($curr_pos < $html_length)
         {
@@ -97,7 +97,7 @@ class Htmlparser
                 $tree->add_child(array('content' => $content));
             }
 
-            if ($this->_is_end_tag($tag))
+            if ($this->is_end_tag($tag))
             {
                 $tag_head = array_pop($tag_stack);
                 // if ($tag_head)
@@ -127,17 +127,33 @@ class Htmlparser
         echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
     }
 
+    /**
+     * 取得整個 dom 的結構
+     *
+     * @return mixed dom 的結構
+     */
     public function get_dom()
     {
         return $this->_dom;
     }
 
+    /**
+     * 取得 TAG 名稱
+     * @param  string $tag 完整的 TAG 字串
+     * @return string      Tag 名稱(大寫)
+     */
     public function get_tag_name($tag='')
     {
-        return strtoupper(substr($tag, 1, strlen($tag)-2));
+        preg_match("/^<([a-z]+)/i", $tag, $tmp);
+        return strtoupper($tmp[1]);
     }
 
-    private function _is_end_tag($tag)
+    /**
+     * 判斷是否為結尾的 TAG
+     * @param  string  $tag 完整 TAG 字串
+     * @return boolean      是否為結尾的 TAG
+     */
+    public function is_end_tag($tag)
     {
         if ($tag[1] == '/')
         {
