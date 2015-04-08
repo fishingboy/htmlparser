@@ -149,4 +149,56 @@ class treeTest extends PHPUnit_Framework_TestCase
         // 測試數量
         $this->assertEquals(6, $tree->get_count());
     }
+
+    /**
+     * get_childs 測試
+     */
+    public function test_get_childs()
+    {
+        $tree = new Tree();
+        $tree->set_root('root');
+        $tree->add_child('1');
+        $tree->add_child('2');
+        $tree->add_child('3');
+        $result = $tree->get_childs();
+        $success_result =
+        [
+            ['node' => 1],
+            ['node' => 2],
+            ['node' => 3]
+        ];
+        $this->assertEquals($success_result, $result);
+    }
+
+    /**
+     * get_childs 測試
+     */
+    public function test_remove_childs()
+    {
+        $tree = new Tree();
+        $tree->set_root('root');
+        $tree->add_child('1');
+        $tree->add_child('2');
+        $tree->add_child('3');
+        $result = $tree->get_childs();
+        $success_result =
+        [
+            ['node' => 1],
+            ['node' => 2],
+            ['node' => 3]
+        ];
+        $this->assertEquals($success_result, $result);
+
+        // 移除子節點
+        $tree->remove_childs();
+        $result = $tree->get_tree();
+        $success_result =
+        [
+            'node' => 'root',
+        ];
+        $this->assertEquals($success_result, $result);
+
+        // 測試 count
+        $this->assertEquals(1, $tree->get_count());
+    }
 }

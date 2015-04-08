@@ -141,4 +141,38 @@ class Tree
         return array('node' => $value);
     }
 
+    /**
+     * 取得目前節點的子節點
+     * @return mixed 子節點資料
+     */
+    public function get_childs()
+    {
+
+        return $this->_curr['childs'];
+    }
+
+    /**
+     * 移除目前節點的子節點
+     * @return boolean 是否成功移除
+     */
+    public function remove_childs()
+    {
+        if (isset($this->_curr['childs']))
+        {
+            // TODO:COUNT 有問題，晚點處理
+            $this->_node_count -= $this->get_childs_count();
+            unset($this->_curr['childs']);
+            return TRUE;
+        }
+        else
+        {
+            return FALSE;
+        }
+    }
+
+    // TODO: 完成這個 METHOD
+    public function get_childs_count($value='')
+    {
+        return 1;
+    }
 }
