@@ -88,12 +88,12 @@ class Htmlparser
             // echo "lt_pos={$lt_pos}, gt_pos={$gt_pos}<br>";
             // $text = substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos+2);
             $tag = substr($this->_html, $lt_pos, $gt_pos-$lt_pos+1);
-            echo "tag=" . htmlspecialchars($tag, ENT_QUOTES);
+            // echo "tag=" . htmlspecialchars($tag, ENT_QUOTES);
             // echo "text=" . htmlspecialchars($text, ENT_QUOTES);
             $content = trim(substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos-1));
             if ($content)
             {
-                echo "<pre>content = " . print_r($content, TRUE). "</pre>";
+                // echo "<pre>content = " . print_r($content, TRUE). "</pre>";
                 $tree->add_child(array('content' => $content));
             }
 
@@ -124,7 +124,7 @@ class Htmlparser
         }
 
         $this->_dom = $tree->get_tree();
-        echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
+        // echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
     }
 
     /**
