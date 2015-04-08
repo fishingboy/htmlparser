@@ -23,6 +23,30 @@ class htmlparserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * parse 測試
+     */
+    public function test_parse()
+    {
+        $parser = new Htmlparser("<div><span>Hello</span></div>");
+        $dom = $parser->get_dom();
+        $success_result =
+        [
+            'node'   => ['tag' => 'DIV'],
+            'childs' =>
+            [
+                [
+                    'node' => ['tag' => 'SPAN'],
+                    'childs' =>
+                    [
+                        ['node' => ['content' => 'Hello']]
+                    ]
+                ]
+            ]
+        ];
+        $this->assertEquals($success_result, $dom);
+    }
+
+    /**
      * get_tag 測試
      */
     public function test_get_tag()
