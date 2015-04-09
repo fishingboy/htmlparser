@@ -1,8 +1,11 @@
 <?php
-include_once('tree.php');
+// 載入 Tree Library
+include_once(__DIR__ . '/tree.php');
 
 /**
  * HTML PARSER
+ *
+ * 此 Class 一定要有 Tree 才能正常執行
  *
  * @author Leo Kuo <et282523@hotmail.com>
  */
@@ -195,16 +198,16 @@ class Htmlparser
         // 結尾 TAG
         if ($tag[1] == '/')
         {
-            return Htmlparser::FOOT_TAG;
+            return self::FOOT_TAG;
         }
 
         // 單一結尾 TAG
         if ($tag[strlen($tag)-2] == '/')
         {
-            return Htmlparser::SINGLE_TAG;
+            return self::SINGLE_TAG;
         }
 
         // 開頭 TAG
-        return Htmlparser::HEAD_TAG;
+        return self::HEAD_TAG;
     }
 }

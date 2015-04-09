@@ -77,9 +77,9 @@ class Tree
      *
      * @param mixed $value 資料
      */
-    public function add_child($value, $type=SELF::TYPE_DATA)
+    public function add_child($value, $type=self::TYPE_DATA)
     {
-        $this->_curr['childs'][] = ($type == SELF::TYPE_NODE) ? $value : $this->get_node_format($value);
+        $this->_curr['childs'][] = ($type == self::TYPE_NODE) ? $value : $this->get_node_format($value);
         $this->_node_count++;
     }
 
