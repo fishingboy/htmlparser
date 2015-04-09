@@ -24,51 +24,128 @@ class htmlparserTest extends PHPUnit_Framework_TestCase
     /**
      * parse 測試
      */
-//     public function test_parse()
-//     {
-//         $html = <<<HTML
-//         <div>
-//             <span>Hello</span>
-//             <br/>
-//             <br>
-//             <p>World!</p>
-//             <p>World!</p>
-//         </div>
-// HTML;
-//         $parser = new Htmlparser($html);
-//         $dom = $parser->get_dom();
-//         $success_result =
-//         [
-//             'node'   => ['tag' => 'DIV'],
-//             'childs' =>
-//             [
-//                 [
-//                     'node' => ['tag' => 'SPAN'],
-//                     'childs' =>
-//                     [
-//                         ['node' => ['content' => 'Hello']],
-//                     ]
-//                 ],
-//                 [
-//                     'node' => ['tag' => 'BR']
-//                 ],
-//                 [
-//                     'node' => ['tag' => 'BR']
-//                 ],
-//                 [
-//                     'node' => ['tag' => 'P'],
-//                     'childs' =>
-//                     [
-//                         ['node' => ['content' => 'World!']]
-//                     ]
-//                 ]
-//             ]
-//         ];
+    public function test_parse()
+    {
+        $html = <<<HTML
+        <div>
+            <span>Hello</span>
+            <br/>
+            <br>
+            <p>World!</p>
+            <p>World!</p>
+        </div>
+HTML;
+        $parser = new Htmlparser($html);
+        $dom = $parser->get_dom();
+        $success_result =
+        [
+            'node'   => ['tag' => 'DIV'],
+            'childs' =>
+            [
+                [
+                    'node' => ['tag' => 'SPAN'],
+                    'childs' =>
+                    [
+                        ['node' => ['content' => 'Hello']],
+                    ]
+                ],
+                [
+                    'node' => ['tag' => 'BR']
+                ],
+                [
+                    'node' => ['tag' => 'BR']
+                ],
+                [
+                    'node' => ['tag' => 'P'],
+                    'childs' =>
+                    [
+                        ['node' => ['content' => 'World!']]
+                    ]
+                ],
+                [
+                    'node' => ['tag' => 'P'],
+                    'childs' =>
+                    [
+                        ['node' => ['content' => 'World!']]
+                    ]
+                ]
+            ]
+        ];
 
-//         echo "<pre>dom = " . print_r($dom, TRUE). "</pre>";
-//         // echo "<pre>success_result = " . print_r($success_result, TRUE). "</pre>";
-//         $this->assertEquals($success_result, $dom);
-//     }
+        $this->assertEquals($success_result, $dom);
+    }
+
+    /**
+     * parse 測試
+     */
+    public function test_parse_no_foot_tag()
+    {
+        // 不允許沒有結尾的 TAG
+        $html = <<<HTML
+        <div>
+            <span>Hello
+            <span>World!</span>
+        </div>
+HTML;
+        $parser = new Htmlparser($html);
+        $dom = $parser->get_dom();
+        $success_result =
+        [
+            'node'   => ['tag' => 'DIV'],
+            'childs' =>
+            [
+                [
+                    'node' => ['tag' => 'SPAN'],
+                    'childs' =>
+                    [
+                        ['node' => ['content' => 'Hello']],
+                        [
+                            'node' => ['tag' => 'SPAN'],
+                            'childs' =>
+                            [
+                                ['node' => ['content' => 'World!']]
+                            ]
+                        ],
+                    ]
+                ]
+            ]
+        ];
+        $this->assertEquals($success_result, $dom);
+
+        // 不允許沒有結尾的 TAG
+        $html = <<<HTML
+        <div>
+            <input type='checkout' value='1'>Hello
+            <span>World!</span>
+        </div>
+HTML;
+        $parser = new Htmlparser($html);
+        $dom = $parser->get_dom();
+        $success_result =
+        [
+            'node'   => ['tag' => 'DIV'],
+            'childs' =>
+            [
+                [
+                    'node' => ['tag' => 'INPUT'],
+                ],
+                ['node' => ['content' => 'Hello']],
+                [
+                    'node' => ['tag' => 'SPAN'],
+                    'childs' =>
+                    [
+                        ['node' => ['content' => 'World!']]
+                    ]
+                ],
+            ]
+        ];
+
+        // echo "<pre>dom = " . print_r($dom, TRUE). "</pre>";
+        // echo "\n--------------------------------------------------\n";
+        // echo "<pre>success_result = " . print_r($success_result, TRUE). "</pre>";
+
+        $this->assertEquals($success_result, $dom);
+    }
 
     /**
      * get_tag 測試

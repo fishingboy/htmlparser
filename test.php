@@ -1,47 +1,33 @@
 <?php
-include_once("tree.php");
+include_once 'htmlparser.php';
 
-$tree = new tree();
-
-// =============================
-$tree->set_root("html");
-
-// =============================
-$tree->add_child("head");
-$tree->seek_last_child();
-
-// =============================
-$tree->add_child("title");
-$tree->seek_last_child();
-
-// =============================
-$tree->seek_parent();
-
-// =============================
-$tree->seek_parent();
-
-// =============================
-$tree->add_child('body');
-$tree->seek_last_child();
-
-// =============================
-$tree->add_child('div');
-$tree->seek_last_child();
-
-// =============================
-$tree->seek_parent();
-
-// =============================
-$tree->add_child('div');
-$tree->seek_last_child();
-
-// =============================
-$tree->seek_parent();
+// $html = <<<HTML
+// <html>
+//     <haed>
+//         <title>Hello Title</title>
+//     </head>
+//     <body>
+//         abc
+//         <div style="color:red">Hello World!</div>
+//     </body>
+// </html>
+// HTML;
 
 
-$result = $tree->get_tree();
+// $html = <<<HTML
+// <html>
+//     <haed>
+//         <title>Hello Title</title>
+//     </head>
+//     <body>
+//         <div>1</div>
+//         <div>2</div>
+//     </body>
+// </html>
+// HTML;
 
-echo "<pre>result = " . print_r($result, TRUE). "</pre>";
-echo "<hr>";
-echo "<pre>tree = " . print_r($tree, TRUE). "</pre>";
-?>
+$html = "<div>Hello <span>World!</span> !!!!</div>";
+$parser = new Htmlparser($html);
+$dom = $parser->get_dom();
+echo "<pre>dom = " . print_r($dom, TRUE). "</pre>";
+

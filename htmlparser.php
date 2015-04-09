@@ -1,39 +1,6 @@
 <?php
 include_once('tree.php');
 
-// $html = <<<HTML
-// <html>
-//     <haed>
-//         <title>Hello Title</title>
-//     </head>
-//     <body>
-//         abc
-//         <div style="color:red">Hello World!</div>
-//     </body>
-// </html>
-// HTML;
-
-
-$html = <<<HTML
-<html>
-    <haed>
-        <title>Hello Title</title>
-    </head>
-    <body>
-        <div>1</div>
-        <div>2</div>
-    </body>
-</html>
-HTML;
-
-$html = "<div>Hello <span>World!</span> !!!!</div>";
-// echo "html={$html}";
-$parser = new Htmlparser($html);
-
-
-// echo "tag = " . Htmlparser::get_tag_name("<div>");
-
-
 /**
  * HTML PARSER
  *
@@ -41,12 +8,20 @@ $parser = new Htmlparser($html);
  */
 class Htmlparser
 {
+    /*********** 常數設定 ***********/
     // 開頭 TAG
     const HEAD_TAG   = 1;
     // 結尾 TAG
     const FOOT_TAG   = 2;
     // 單一 TAG (如 <br />)
     const SINGLE_TAG = 3;
+
+    /**
+     * 允許沒有結尾的 TAG
+     *
+     * @var array
+     */
+    private $_allow_single_tag = ['BR', 'P', 'INPUT', 'HR'];
 
     /**
      * HTML
@@ -128,10 +103,33 @@ class Htmlparser
                 case SELF::FOOT_TAG :
                     $tag_head = array_pop($tag_stack);
                     $tag_name = $this->get_end_tag_name($tag);
+
+                    // 有開頭沒結尾的特殊處理
                     if ($tag_head != $tag_name)
                     {
-                        // echo "[$tag_head] ==> [$tag_name]\n";
-                        // TODO: 將該節點底下的子節點，移到跟該節點同一層的地方
+                        // 如果是允許沒有結尾的 TAG, 則將該節點底下的子節點，移到跟該節點同一層的地方
+                        if (in_array($tag_head, $this->_allow_single_tag))
+                        {
+                            // 先取得目前的所有子節點
+                            $tmp_childs = $tree->get_childs();
+
+                            // 移除所有子節點
+                            $tree->remove_childs();
+
+                            // 走訪到父節點
+                            $tree->seek_parent();
+
+                            // 將剛才取得的子節點一個一個加入
+                            foreach ($tmp_childs as $node)
+                            {
+                                $tree->add_child($node, Tree::TYPE_NODE);
+                            }
+                        }
+                        else
+                        {
+                            // 走訪到父節點
+                            $tree->seek_parent();
+                        }
                     }
                     $tree->seek_parent();
                     break;
@@ -146,8 +144,13 @@ class Htmlparser
             $curr_pos = $gt_pos;
         }
 
+        // TODO: 例外處理
+        // 1. 缺少結尾 TAG 的情況
+        // 2. 還有文字的情況
+        // echo "foot = '" . substr($this->_html, $curr_pos+1) . "' <br>";
+
+        // 指定 dom 的值
         $this->_dom = $tree->get_tree();
-        // echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
     }
 
     /**
