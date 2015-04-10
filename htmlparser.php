@@ -111,6 +111,7 @@ class Htmlparser
                     if ($tag_head != $tag_name)
                     {
                         // 如果是允許沒有結尾的 TAG, 則將該節點底下的子節點，移到跟該節點同一層的地方
+                        // TODO: 補上警告訊息
                         if (in_array($tag_head, $this->_allow_single_tag))
                         {
                             // 先取得目前的所有子節點
@@ -147,10 +148,17 @@ class Htmlparser
             $curr_pos = $gt_pos;
         }
 
-        // TODO: 例外處理
-        // 1. 缺少結尾 TAG 的情況
-        // 2. 還有文字的情況
-        // echo "foot = '" . substr($this->_html, $curr_pos+1) . "' <br>";
+        // 例外處理
+        // 1. 還有文字的情況
+        $foot_text = substr($this->_html, $curr_pos+1);
+        if ($foot_text)
+        {
+            $tree->add_child(['content' => $content]);
+        }
+
+        // 2. 缺少結尾 TAG 的情況
+        //    直接結束就行了
+        //    TODO: 補上警告訊息
 
         // 指定 dom 的值
         $this->_dom = $tree->get_tree();
