@@ -1,46 +1,31 @@
 <?php
-include_once('tree.php');
-
-// $html = <<<HTML
-// <html>
-//     <haed>
-//         <title>Hello Title</title>
-//     </head>
-//     <body>
-//         abc
-//         <div style="color:red">Hello World!</div>
-//     </body>
-// </html>
-// HTML;
-
-
-$html = <<<HTML
-<html>
-    <haed>
-        <title>Hello Title</title>
-    </head>
-    <body>
-        <div>1</div>
-        <div>2</div>
-    </body>
-</html>
-HTML;
-
-$html = "<div>Hello <span>World!</span> !!!!</div>";
-// echo "html={$html}";
-$parser = new Htmlparser($html);
-
-
-// echo "tag = " . Htmlparser::get_tag_name("<div>");
-
+// 載入 Tree Library
+include_once(__DIR__ . '/tree.php');
 
 /**
  * HTML PARSER
+ *
+ * 此 Class 一定要有 Tree 才能正常執行
  *
  * @author Leo Kuo <et282523@hotmail.com>
  */
 class Htmlparser
 {
+    /*********** 常數設定 ***********/
+    // 開頭 TAG
+    const HEAD_TAG   = 1;
+    // 結尾 TAG
+    const FOOT_TAG   = 2;
+    // 單一 TAG (如 <br />)
+    const SINGLE_TAG = 3;
+
+    /**
+     * 允許沒有結尾的 TAG
+     *
+     * @var array
+     */
+    private $_allow_single_tag = ['BR', 'P', 'INPUT', 'HR'];
+
     /**
      * HTML
      *
@@ -77,54 +62,106 @@ class Htmlparser
 
         $tree = new Tree();
         $tag_stack = array();
+        $i=0;
         while ($curr_pos < $html_length)
         {
+            // 找下一個 TAG
             $lt_pos = strpos($this->_html, '<', $curr_pos+1);
             $gt_pos = strpos($this->_html, '>', $lt_pos);
             if ($lt_pos === FALSE)
             {
                 break;
             }
-            // echo "lt_pos={$lt_pos}, gt_pos={$gt_pos}<br>";
-            // $text = substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos+2);
             $tag = substr($this->_html, $lt_pos, $gt_pos-$lt_pos+1);
-            echo "tag=" . htmlspecialchars($tag, ENT_QUOTES);
-            // echo "text=" . htmlspecialchars($text, ENT_QUOTES);
+
+            // 取得文字內容
             $content = trim(substr($this->_html, $curr_pos+1, $lt_pos-$curr_pos-1));
             if ($content)
             {
-                echo "<pre>content = " . print_r($content, TRUE). "</pre>";
                 $tree->add_child(array('content' => $content));
             }
 
-            if ($this->is_end_tag($tag))
+            // TAG 處理
+            $tag_type = $this->get_tag_type($tag);
+            switch ($tag_type)
             {
-                $tag_head = array_pop($tag_stack);
-                // if ($tag_head)
-                // {
-                // }
-                $tree->seek_parent();
-            }
-            else
-            {
-                $tag_name = $this->get_tag_name($tag);
-                if ($tree->get_count() == 0)
-                {
-                    $tree->set_root(array('tag' => $this->get_tag_name($tag)));
-                }
-                else
-                {
-                    $tree->add_child(array('tag' => $this->get_tag_name($tag)));
-                    $tree->seek_last_child();
-                }
+                // 開頭 TAG
+                case SELF::HEAD_TAG :
+                    $tag_name = $this->get_tag_name($tag);
+                    if ($tree->get_count() == 0)
+                    {
+                        $tree->set_root(['tag' => $this->get_tag_name($tag)]);
+                    }
+                    else
+                    {
+                        $tree->add_child(['tag' => $this->get_tag_name($tag)]);
+                        $tree->seek_last_child();
+                    }
 
-                $tag_stack[] = $tag_name;
+                    // 加入未結尾 TAG 的堆疊
+                    $tag_stack[] = $tag_name;
+                    break;
+
+                // 結尾 TAG
+                case SELF::FOOT_TAG :
+                    $tag_head = array_pop($tag_stack);
+                    $tag_name = $this->get_end_tag_name($tag);
+
+                    // 有開頭沒結尾的特殊處理
+                    if ($tag_head != $tag_name)
+                    {
+                        // 如果是允許沒有結尾的 TAG, 則將該節點底下的子節點，移到跟該節點同一層的地方
+                        // TODO: 補上警告訊息
+                        if (in_array($tag_head, $this->_allow_single_tag))
+                        {
+                            // 先取得目前的所有子節點
+                            $tmp_childs = $tree->get_childs();
+
+                            // 移除所有子節點
+                            $tree->remove_childs();
+
+                            // 走訪到父節點
+                            $tree->seek_parent();
+
+                            // 將剛才取得的子節點一個一個加入
+                            foreach ($tmp_childs as $node)
+                            {
+                                $tree->add_child($node, Tree::TYPE_NODE);
+                            }
+                        }
+                        else
+                        {
+                            // 走訪到父節點
+                            $tree->seek_parent();
+                        }
+                    }
+                    $tree->seek_parent();
+                    break;
+
+                // 單一 TAG
+                case SELF::SINGLE_TAG :
+                    // 直接將節點加入
+                    $tag_name = $this->get_end_tag_name($tag);
+                    $tree->add_child(['tag' => $this->get_tag_name($tag)]);
+                    break;
             }
             $curr_pos = $gt_pos;
         }
 
+        // 例外處理
+        // 1. 還有文字的情況
+        $foot_text = substr($this->_html, $curr_pos+1);
+        if ($foot_text)
+        {
+            $tree->add_child(['content' => $content]);
+        }
+
+        // 2. 缺少結尾 TAG 的情況
+        //    直接結束就行了
+        //    TODO: 補上警告訊息
+
+        // 指定 dom 的值
         $this->_dom = $tree->get_tree();
-        echo "<pre>this->_dom = " . print_r($this->_dom, TRUE). "</pre>";
     }
 
     /**
@@ -149,22 +186,36 @@ class Htmlparser
     }
 
     /**
+     * 取得結尾 TAG 名稱
+     * @param  string $tag 完整的 TAG 字串
+     * @return string      Tag 名稱(大寫)
+     */
+    public function get_end_tag_name($tag='')
+    {
+        preg_match("/^<(\/)?([a-z]+)/i", $tag, $tmp);
+        return strtoupper($tmp[2]);
+    }
+
+    /**
      * 判斷是否為結尾的 TAG
      * @param  string  $tag 完整 TAG 字串
-     * @return boolean      是否為結尾的 TAG
+     * @return integer      Tag 的類型
      */
-    public function is_end_tag($tag)
+    public function get_tag_type($tag)
     {
+        // 結尾 TAG
         if ($tag[1] == '/')
         {
-            return TRUE;
+            return self::FOOT_TAG;
         }
 
+        // 單一結尾 TAG
         if ($tag[strlen($tag)-2] == '/')
         {
-            return TRUE;
+            return self::SINGLE_TAG;
         }
 
-        return FALSE;
+        // 開頭 TAG
+        return self::HEAD_TAG;
     }
 }

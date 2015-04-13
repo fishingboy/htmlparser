@@ -6,6 +6,10 @@
  */
 class Tree
 {
+    // 常數設定
+    const TYPE_DATA = 1;
+    const TYPE_NODE = 2;
+
     /**
      * 樹 - 資料
      *
@@ -71,11 +75,11 @@ class Tree
     /**
      * 在目前位置增加子節點
      *
-     * @param mixed $value 子節點資料
+     * @param mixed $value 資料
      */
-    public function add_child($value)
+    public function add_child($value, $type=self::TYPE_DATA)
     {
-        $this->_curr['childs'][] = $this->get_node_format($value);
+        $this->_curr['childs'][] = ($type == self::TYPE_NODE) ? $value : $this->get_node_format($value);
         $this->_node_count++;
     }
 
@@ -141,4 +145,47 @@ class Tree
         return array('node' => $value);
     }
 
+    /**
+     * 取得目前節點的子節點
+     * @return mixed 子節點資料
+     */
+    public function get_childs()
+    {
+
+        return $this->_curr['childs'];
+    }
+
+    /**
+     * 移除目前節點的子節點
+     * @return boolean 是否成功移除
+     */
+    public function remove_childs()
+    {
+        if (isset($this->_curr['childs']))
+        {
+            // TODO:COUNT 有問題，晚點處理
+            $this->_node_count -= $this->get_childs_count();
+            unset($this->_curr['childs']);
+            return TRUE;
+        }
+        else
+        {
+            return FALSE;
+        }
+    }
+
+    // TODO: 完成這個 METHOD
+    public function get_childs_count($value='')
+    {
+        return 1;
+    }
+
+    /**
+     * 顯示目前節點 (Debug 用)
+     * @return void
+     */
+    public function show_curr()
+    {
+        echo "<pre>curr = " . print_r($this->_curr, TRUE). "</pre>";
+    }
 }
