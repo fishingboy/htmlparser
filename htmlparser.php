@@ -218,4 +218,15 @@ class Htmlparser
         // 開頭 TAG
         return self::HEAD_TAG;
     }
+
+    /**
+     * 取得 html
+     *
+     * @return string 重整過後的 HTML
+     */
+    public function get_format_html()
+    {
+        // return $this->_html;
+        return print_r($this->_html, TRUE);
+    }
 }

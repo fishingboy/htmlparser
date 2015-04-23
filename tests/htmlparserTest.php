@@ -177,4 +177,12 @@ HTML;
         $this->assertEquals("BR", Htmlparser::get_end_tag_name("<br/>"));
         $this->assertEquals("INPUT", Htmlparser::get_end_tag_name("<input type='button' value='ok'/>"));
     }
+
+    /**
+     * get_tag 測試
+     */
+    public function test_get_format_html()
+    {
+        $this->assertEquals("DIV", Htmlparser::get_format_html("<div>1</div>"));
+    }
 }
